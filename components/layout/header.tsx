@@ -47,15 +47,6 @@ export function Header() {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end">
-          <DropdownMenuItem asChild>
-            <Link href="/profile" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              Profile
-            </Link>
-          </DropdownMenuItem>
-
-          <DropdownMenuSeparator />
-
           <DropdownMenuItem
             onClick={() => signOut({ callbackUrl: "/login" })}
             className="flex items-center gap-2 text-red-600 focus:text-red-600"

@@ -187,5 +187,23 @@
     "workType": "Development",
     "description": "Fix the sidebar issue Updated",
     "hours": 4
+  },
+  {
+    "id": "entry-1789223930213",
+    "timesheetId": "week-3",
+    "date": "2024-01-17",
+    "project": "Project Gamma",
+    "workType": "Testing",
+    "description": "Test flow - end to end test Updated",
+    "hours": 8
+  },
+  {
+    "id": "entry-1789223982125",
+    "timesheetId": "week-5",
+    "date": "2024-01-28",
+    "project": "Project Alpha",
+    "workType": "Development",
+    "description": "Dummy development task Updated",
+    "hours": 8
   }
 ]
