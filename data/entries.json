@@ -1,0 +1,191 @@
+[
+  {
+    "id": "entry-1",
+    "timesheetId": "week-1",
+    "date": "2024-01-01",
+    "project": "Project Alpha",
+    "workType": "Bug fixes",
+    "description": "Fixed login validation",
+    "hours": 4
+  },
+  {
+    "id": "entry-2",
+    "timesheetId": "week-1",
+    "date": "2024-01-01",
+    "project": "Project Alpha",
+    "workType": "Development",
+    "description": "Homepage development",
+    "hours": 4
+  },
+  {
+    "id": "entry-3",
+    "timesheetId": "week-1",
+    "date": "2024-01-02",
+    "project": "Project Beta",
+    "workType": "Development",
+    "description": "API implementation",
+    "hours": 8
+  },
+  {
+    "id": "entry-4",
+    "timesheetId": "week-1",
+    "date": "2024-01-03",
+    "project": "Project Alpha",
+    "workType": "Development",
+    "description": "Auth flow refactor",
+    "hours": 8
+  },
+  {
+    "id": "entry-5",
+    "timesheetId": "week-1",
+    "date": "2024-01-04",
+    "project": "Project Beta",
+    "workType": "Testing",
+    "description": "Wrote integration tests",
+    "hours": 8
+  },
+  {
+    "id": "entry-6",
+    "timesheetId": "week-1",
+    "date": "2024-01-05",
+    "project": "Project Alpha",
+    "workType": "Development",
+    "description": "Code review + fixes",
+    "hours": 8
+  },
+  {
+    "id": "entry-7",
+    "timesheetId": "week-2",
+    "date": "2024-01-08",
+    "project": "Project Alpha",
+    "workType": "Bug fixes",
+    "description": "Fixed dashboard issue",
+    "hours": 5
+  },
+  {
+    "id": "entry-8",
+    "timesheetId": "week-2",
+    "date": "2024-01-09",
+    "project": "Project Beta",
+    "workType": "Development",
+    "description": "Payment gateway setup",
+    "hours": 6
+  },
+  {
+    "id": "entry-9",
+    "timesheetId": "week-3",
+    "date": "2024-01-15",
+    "project": "Project Gamma",
+    "workType": "Development",
+    "description": "User settings page",
+    "hours": 4
+  },
+  {
+    "id": "entry-10",
+    "timesheetId": "week-6",
+    "date": "2024-02-05",
+    "project": "Project Alpha",
+    "workType": "Development",
+    "description": "Reporting module",
+    "hours": 8
+  },
+  {
+    "id": "entry-11",
+    "timesheetId": "week-6",
+    "date": "2024-02-06",
+    "project": "Project Alpha",
+    "workType": "Development",
+    "description": "Reporting module cont.",
+    "hours": 8
+  },
+  {
+    "id": "entry-12",
+    "timesheetId": "week-6",
+    "date": "2024-02-07",
+    "project": "Project Beta",
+    "workType": "Bug fixes",
+    "description": "Fixed export CSV bug",
+    "hours": 8
+  },
+  {
+    "id": "entry-13",
+    "timesheetId": "week-6",
+    "date": "2024-02-08",
+    "project": "Project Beta",
+    "workType": "Testing",
+    "description": "QA pass on exports",
+    "hours": 8
+  },
+  {
+    "id": "entry-14",
+    "timesheetId": "week-6",
+    "date": "2024-02-09",
+    "project": "Project Alpha",
+    "workType": "Development",
+    "description": "Sprint wrap-up",
+    "hours": 8
+  },
+  {
+    "id": "entry-15",
+    "timesheetId": "week-8",
+    "date": "2024-02-19",
+    "project": "Project Gamma",
+    "workType": "Development",
+    "description": "Notification service",
+    "hours": 6
+  },
+  {
+    "id": "entry-16",
+    "timesheetId": "week-9",
+    "date": "2024-02-26",
+    "project": "Project Alpha",
+    "workType": "Development",
+    "description": "Analytics dashboard",
+    "hours": 8
+  },
+  {
+    "id": "entry-17",
+    "timesheetId": "week-9",
+    "date": "2024-02-27",
+    "project": "Project Alpha",
+    "workType": "Development",
+    "description": "Analytics dashboard cont.",
+    "hours": 8
+  },
+  {
+    "id": "entry-18",
+    "timesheetId": "week-9",
+    "date": "2024-02-28",
+    "project": "Project Beta",
+    "workType": "Bug fixes",
+    "description": "Fixed timezone bug",
+    "hours": 8
+  },
+  {
+    "id": "entry-19",
+    "timesheetId": "week-9",
+    "date": "2024-02-29",
+    "project": "Project Beta",
+    "workType": "Development",
+    "description": "Refactor date utils",
+    "hours": 8
+  },
+  {
+    "id": "entry-20",
+    "timesheetId": "week-9",
+    "date": "2024-03-01",
+    "project": "Project Gamma",
+    "workType": "Documentation",
+    "description": "API docs",
+    "hours": 8
+  },
+  {
+    "id": "entry-1789213782849",
+    "timesheetId": "week-3",
+    "date": "2024-01-17",
+    "project": "Project Alpha",
+    "workType": "Development",
+    "description": "Fix the sidebar issue Updated",
+    "hours": 4
+  }
+]
