@@ -1,4 +1,4 @@
-import { getJsonDatabase } from "./db";
+import { prisma } from "./db";
 
 export type User = {
   id: string;
@@ -8,13 +8,17 @@ export type User = {
 };
 
 export async function getUsers() {
-  const db = await getJsonDatabase<User[]>("users.json", []);
-
-  return db.data;
+  return prisma.user.findMany({
+    orderBy: {
+      name: "asc",
+    },
+  });
 }
 
 export async function findUserByEmail(email: string) {
-  const users = await getUsers();
-
-  return users.find((user) => user.email.toLowerCase() === email.toLowerCase());
+  return prisma.user.findUnique({
+    where: {
+      email: email.toLowerCase(),
+    },
+  });
 }

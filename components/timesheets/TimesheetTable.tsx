@@ -32,11 +32,11 @@ import { StatusBadge } from "./StatusBadge";
 import { SortableHeader } from "./SortableHeader";
 import { formatDateRange } from "@/lib/format-date-range";
 import {
-  Timesheet,
   TimesheetStatus,
   TimesheetSortColumn,
   SortOrder,
 } from "@/lib/timesheets";
+import { Timesheet } from "@/types/timesheets";
 import { DateRange } from "react-day-picker";
 
 const ACTION_LABEL: Record<TimesheetStatus, string> = {

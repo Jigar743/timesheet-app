@@ -1,5 +1,6 @@
 // lib/entries.ts
-import { getJsonDatabase } from "./db";
+import { prisma } from "./db";
+import type { TimesheetEntry as PrismaTimesheetEntry } from "../generated/prisma";
 import { TimesheetStatus } from "./timesheets";
 
 export type TimesheetEntry = {
@@ -14,23 +15,17 @@ export type TimesheetEntry = {
 
 const COMPLETED_HOURS_THRESHOLD = 40;
 
-export async function getEntriesDb() {
-  return getJsonDatabase<TimesheetEntry[]>("entries.json", []);
-}
-
 export async function getEntriesByTimesheetId(timesheetId: string) {
-  const db = await getEntriesDb();
-
-  return db.data
-    .filter((entry) => entry.timesheetId === timesheetId)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const rows = await prisma.timesheetEntry.findMany({
+    where: { timesheetId },
+    orderBy: { date: "asc" },
+  });
+  return rows.map(serializeEntry);
 }
 
 export function computeStatus(entries: TimesheetEntry[]): TimesheetStatus {
   if (entries.length === 0) return "MISSING";
-
   const totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
-
   return totalHours >= COMPLETED_HOURS_THRESHOLD ? "COMPLETED" : "INCOMPLETE";
 }
 
@@ -38,43 +33,59 @@ export async function createEntry(
   timesheetId: string,
   input: Omit<TimesheetEntry, "id" | "timesheetId">,
 ) {
-  const db = await getEntriesDb();
-
-  const entry: TimesheetEntry = {
-    id: `entry-${Date.now()}`,
-    timesheetId,
-    ...input,
-  };
-
-  db.data.push(entry);
-  await db.write();
-
-  return entry;
+  const entry = await prisma.timesheetEntry.create({
+    data: {
+      timesheetId,
+      date: new Date(input.date),
+      project: input.project,
+      workType: input.workType,
+      description: input.description,
+      hours: input.hours,
+    },
+  });
+  return serializeEntry(entry);
 }
 
 export async function updateEntry(
   entryId: string,
   input: Partial<Omit<TimesheetEntry, "id" | "timesheetId">>,
 ) {
-  const db = await getEntriesDb();
-
-  const entry = db.data.find((e) => e.id === entryId);
-  if (!entry) return null;
-
-  Object.assign(entry, input);
-  await db.write();
-
-  return entry;
+  try {
+    const entry = await prisma.timesheetEntry.update({
+      where: { id: entryId },
+      data: {
+        ...(input.date && { date: new Date(input.date) }),
+        ...(input.project && { project: input.project }),
+        ...(input.workType && { workType: input.workType }),
+        ...(input.description !== undefined && {
+          description: input.description,
+        }),
+        ...(input.hours !== undefined && { hours: input.hours }),
+      },
+    });
+    return serializeEntry(entry);
+  } catch {
+    return null;
+  }
 }
 
 export async function deleteEntry(entryId: string) {
-  const db = await getEntriesDb();
+  try {
+    await prisma.timesheetEntry.delete({ where: { id: entryId } });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-  const index = db.data.findIndex((e) => e.id === entryId);
-  if (index === -1) return false;
-
-  db.data.splice(index, 1);
-  await db.write();
-
-  return true;
+function serializeEntry(e: PrismaTimesheetEntry): TimesheetEntry {
+  return {
+    id: e.id,
+    timesheetId: e.timesheetId,
+    date: e.date.toISOString().slice(0, 10),
+    project: e.project,
+    workType: e.workType,
+    description: e.description,
+    hours: e.hours,
+  };
 }

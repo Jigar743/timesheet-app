@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import { TimesheetDetail } from "@/components/timesheets/TimesheetDetails";
-import { Timesheet } from "@/lib/timesheets";
+import { Timesheet } from "@/types/timesheets";
 import { TimesheetEntry } from "@/lib/entries";
 
 export default function TimesheetDetailPage() {

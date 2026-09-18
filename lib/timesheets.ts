@@ -1,61 +1,26 @@
 // lib/timesheets.ts
-import { getJsonDatabase } from "./db";
+import { prisma } from "./db";
+import type { Prisma, Timesheet as PrismaTimesheet } from "../generated/prisma";
+import { TimesheetStatus as PrismaStatus } from "../generated/prisma";
 
 export type TimesheetStatus = "COMPLETED" | "INCOMPLETE" | "MISSING";
-
-export type Timesheet = {
-  id: string;
-  weekNumber: number;
-  startDate: string;
-  endDate: string;
-  status: TimesheetStatus;
-};
-
 export type TimesheetSortColumn = "weekNumber" | "startDate" | "status";
 export type SortOrder = "asc" | "desc";
 
-export async function getTimesheets() {
-  const db = await getJsonDatabase<Timesheet[]>("timesheets.json", []);
-
-  return db.data;
-}
-
-function compareTimesheets(
-  a: Timesheet,
-  b: Timesheet,
-  sortBy: TimesheetSortColumn,
-) {
-  switch (sortBy) {
-    case "weekNumber":
-      return a.weekNumber - b.weekNumber;
-    case "startDate":
-      return new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
-    case "status":
-      return a.status.localeCompare(b.status);
-    default:
-      return 0;
-  }
-}
-
 export async function getTimesheetById(id: string) {
-  const timesheets = await getTimesheets();
-
-  return timesheets.find((t) => t.id === id) ?? null;
+  const t = await prisma.timesheet.findUnique({ where: { id } });
+  return t ? serializeTimesheet(t) : null;
 }
 
 export async function updateTimesheetStatus(
   id: string,
   status: TimesheetStatus,
 ) {
-  const db = await getJsonDatabase<Timesheet[]>("timesheets.json", []);
-
-  const timesheet = db.data.find((t) => t.id === id);
-  if (!timesheet) return null;
-
-  timesheet.status = status;
-  await db.write();
-
-  return timesheet;
+  const t = await prisma.timesheet.update({
+    where: { id },
+    data: { status: status as PrismaStatus },
+  });
+  return serializeTimesheet(t);
 }
 
 export async function getTimesheetsPaginated({
@@ -75,35 +40,44 @@ export async function getTimesheetsPaginated({
   dateFrom?: string;
   dateTo?: string;
 }) {
-  let timesheets = await getTimesheets();
+  const where: Prisma.TimesheetWhereInput = {};
 
   if (status && status !== "ALL") {
-    timesheets = timesheets.filter((t) => t.status === status);
+    where.status = status;
   }
 
   if (dateFrom && dateTo) {
-    const rangeStart = new Date(dateFrom).getTime();
-    const rangeEnd = new Date(dateTo).getTime();
-
-    timesheets = timesheets.filter((t) => {
-      const weekStart = new Date(t.startDate).getTime();
-      const weekEnd = new Date(t.endDate).getTime();
-
-      // Overlap check: week overlaps range if it starts before range ends
-      // AND ends after range starts
-      return weekStart <= rangeEnd && weekEnd >= rangeStart;
-    });
+    where.startDate = { lte: new Date(dateTo) };
+    where.endDate = { gte: new Date(dateFrom) };
   }
 
-  timesheets = [...timesheets].sort((a, b) => {
-    const result = compareTimesheets(a, b, sortBy);
-    return sortOrder === "asc" ? result : -result;
+  const total = await prisma.timesheet.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / perPage));
+
+  const rows = await prisma.timesheet.findMany({
+    where,
+    orderBy: { [sortBy]: sortOrder },
+    skip: (page - 1) * perPage,
+    take: perPage,
   });
 
-  const total = timesheets.length;
-  const totalPages = Math.max(1, Math.ceil(total / perPage));
-  const start = (page - 1) * perPage;
-  const data = timesheets.slice(start, start + perPage);
+  return {
+    data: rows.map(serializeTimesheet),
+    total,
+    totalPages,
+    page,
+    perPage,
+    sortBy,
+    sortOrder,
+  };
+}
 
-  return { data, total, totalPages, page, perPage, sortBy, sortOrder };
+function serializeTimesheet(t: PrismaTimesheet) {
+  return {
+    id: t.id,
+    weekNumber: t.weekNumber,
+    startDate: t.startDate.toISOString().slice(0, 10),
+    endDate: t.endDate.toISOString().slice(0, 10),
+    status: t.status as TimesheetStatus,
+  };
 }

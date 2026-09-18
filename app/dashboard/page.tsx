@@ -1,7 +1,7 @@
 // app/dashboard/page.tsx
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { DateRange } from "react-day-picker";
 
 import {
@@ -14,12 +14,21 @@ import {
 import { TimesheetsTable } from "@/components/timesheets/TimesheetTable";
 import { DateRangeFilter } from "@/components/timesheets/DateRangeFilter";
 import { TimesheetStatus } from "@/lib/timesheets";
+import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 
 export default function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState<TimesheetStatus | "ALL">(
     "ALL",
   );
+  const { data: session } = useSession();
   const [committedRange, setCommittedRange] = useState<DateRange | undefined>();
+
+  React.useEffect(() => {
+    if (session?.user?.name) {
+      toast.success(`Welcome back, ${session.user.name}!`);
+    }
+  }, [session?.user?.name]);
 
   return (
     <div className="rounded-lg border bg-white p-6 shadow-sm">
@@ -36,7 +45,7 @@ export default function DashboardPage() {
             setStatusFilter(value as TimesheetStatus | "ALL")
           }
         >
-          <SelectTrigger className="w-[140px]">
+          <SelectTrigger className="w-35">
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent position="popper">

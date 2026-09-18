@@ -5,17 +5,6 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { MoreHorizontal, Plus } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -25,26 +14,11 @@ import {
 import { Progress } from "@/components/ui/progress";
 
 import { formatDateRange } from "@/lib/format-date-range";
-import { Timesheet } from "@/lib/timesheets";
 import { TimesheetEntry } from "@/lib/entries";
+import { Timesheet } from "@/types/timesheets";
 import { cn } from "@/lib/utils";
 import { EntryFormModal, EntryFormValues } from "./EntryFormModal";
-
-type EntryFormState = {
-  date: string;
-  project: string;
-  workType: string;
-  description: string;
-  hours: string;
-};
-
-const EMPTY_FORM: EntryFormState = {
-  date: "",
-  project: "",
-  workType: "",
-  description: "",
-  hours: "",
-};
+import { toast } from "sonner";
 
 const WEEKLY_HOURS_TARGET = 40;
 
@@ -160,15 +134,18 @@ export function TimesheetDetail({
       const json = await res.json();
 
       if (!res.ok) {
+        toast.error("Something went wrong.");
         setError(json.error ?? "Something went wrong.");
         return;
       }
 
       if (editingEntry) {
+        toast.success("Entry updated successfully!");
         setEntries((prev) =>
           prev.map((e) => (e.id === editingEntry.id ? json.entry : e)),
         );
       } else {
+        toast.success("Entry created successfully!");
         setEntries((prev) => [...prev, json.entry]);
       }
 
@@ -188,8 +165,12 @@ export function TimesheetDetail({
     );
 
     const json = await res.json();
-    if (!res.ok) return;
+    if (!res.ok) {
+      toast.error("Failed to delete entry.");
+      return;
+    }
 
+    toast.success("Entry deleted successfully!");
     setEntries((prev) => prev.filter((e) => e.id !== entryId));
     if (json.timesheet) setStatus(json.timesheet.status);
     router.refresh();

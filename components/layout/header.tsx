@@ -3,15 +3,15 @@
 
 import Link from "next/link";
 import { signOut, useSession } from "next-auth/react";
-import { ChevronDown, LogOut, User } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 const navLinks = [{ label: "Timesheets", href: "/dashboard" }];
 
@@ -48,7 +48,10 @@ export function Header() {
 
         <DropdownMenuContent align="end">
           <DropdownMenuItem
-            onClick={() => signOut({ callbackUrl: "/login" })}
+            onClick={() => {
+              toast.success(`Signed out successfully!`);
+              signOut({ callbackUrl: "/login", redirect: true });
+            }}
             className="flex items-center gap-2 text-red-600 focus:text-red-600"
           >
             <LogOut className="h-4 w-4" />

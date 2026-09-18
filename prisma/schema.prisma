@@ -1,0 +1,41 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+model User {
+  id       String @id @default(cuid())
+  name     String
+  email    String @unique
+  password String
+}
+
+enum TimesheetStatus {
+  COMPLETED
+  INCOMPLETE
+  MISSING
+}
+
+model Timesheet {
+  id         String           @id @default(cuid())
+  weekNumber Int
+  startDate  DateTime
+  endDate    DateTime
+  status     TimesheetStatus  @default(MISSING)
+  entries    TimesheetEntry[]
+}
+
+model TimesheetEntry {
+  id          String    @id @default(cuid())
+  timesheetId String
+  timesheet   Timesheet @relation(fields: [timesheetId], references: [id], onDelete: Cascade)
+  date        DateTime
+  project     String
+  workType    String
+  description String
+  hours       Int
+}

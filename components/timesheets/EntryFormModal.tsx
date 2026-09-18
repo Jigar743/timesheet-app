@@ -144,7 +144,7 @@ export function EntryFormModal({
               placeholder="Write text here ..."
               value={values.description}
               onChange={(e) => updateField("description", e.target.value)}
-              className="min-h-[100px] resize-none"
+              className="min-h-25 resize-none"
             />
 
             <p className="text-xs text-gray-400">A note for extra info</p>
