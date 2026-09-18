@@ -1,52 +1,55 @@
 # Ticktock - Timesheet Management App
 
-A SaaS-style Timesheet Management application built with Next.js, TypeScript, Tailwind CSS, shadcn/ui, NextAuth, and lowdb.
+A SaaS-style Timesheet Management application built with **Next.js,
+TypeScript, Tailwind CSS, shadcn/ui, NextAuth, Prisma, and PostgreSQL**.
 
-The application allows authenticated users to view and manage weekly timesheets, track daily work entries, and monitor weekly working hours.
+The application allows authenticated users to view and manage weekly
+timesheets, track daily work entries, and monitor weekly working hours.
 
----
+------------------------------------------------------------------------
 
 ## Features
 
 ### Authentication
 
-- Email and password login
-- Credentials-based authentication using NextAuth
-- JWT-based sessions
-- Protected dashboard
-- Invalid credential handling
-- Logout support
+-   Email and password login
+-   Credentials-based authentication using NextAuth
+-   JWT-based sessions
+-   Protected dashboard
+-   Invalid credential handling
+-   Logout support
 
 ### Timesheet Dashboard
 
-- View all weekly timesheets
-- View timesheet status
-- Filter by date range
-- Filter by status
-- Pagination
-- Status-based actions
+-   View weekly timesheets
+-   View timesheet status
+-   Filter by date range
+-   Filter by status
+-   Pagination
+-   Status-based actions
 
 ### Weekly Timesheet
 
-- View entries grouped by day
-- Display weekly total hours
-- 40-hour weekly progress
-- Add new task
-- Edit existing task
-- Delete task
-- Responsive layout
+-   View entries grouped by day
+-   Display weekly total hours
+-   40-hour weekly progress
+-   Add new task
+-   Edit existing task
+-   Delete task
+-   Responsive layout
 
 ### Timesheet Status
 
 The application supports three statuses:
 
-- `COMPLETED`
-- `INCOMPLETE`
-- `MISSING`
+-   `COMPLETED`
+-   `INCOMPLETE`
+-   `MISSING`
 
-A missing timesheet becomes incomplete when the first task is successfully created.
+A missing timesheet becomes incomplete when the first task is
+successfully created.
 
-```text
+``` text
 MISSING
    |
    | Add first task
@@ -54,30 +57,49 @@ MISSING
 INCOMPLETE
 ```
 
-Completed timesheets are read-only.
+Completed timesheets are read-only:
 
-```text
+``` text
 COMPLETED
    |
    └── View only
 ```
 
----
+### Toast Notifications
+
+The application uses **Sonner** through shadcn/ui for user feedback.
+
+Examples include:
+
+-   Successful timesheet creation
+-   Successful timesheet updates
+-   Successful deletion
+-   API errors
+-   Validation messages
+
+The global `<Toaster />` is configured through the application's
+`Providers` component.
+
+------------------------------------------------------------------------
 
 # Tech Stack
 
-| Technology | Purpose |
-|---|---|
-| Next.js | Application framework |
-| TypeScript | Type safety |
-| React | UI development |
-| Tailwind CSS | Styling |
-| shadcn/ui | Reusable UI components |
-| NextAuth | Authentication and sessions |
-| lowdb | JSON-based persistence |
-| ESLint | Code quality |
+  Technology             Purpose
+  ---------------------- --------------------------------------
+  Next.js 16             Application framework
+  React 19               UI development
+  TypeScript             Type safety
+  Tailwind CSS           Styling
+  shadcn/ui              Reusable UI components
+  Sonner                 Toast notifications
+  NextAuth               Authentication and sessions
+  Prisma 7               ORM and database access
+  Prisma Postgres        Hosted PostgreSQL database
+  `@prisma/adapter-pg`   PostgreSQL driver adapter for Prisma
+  `pg`                   PostgreSQL client
+  ESLint                 Code quality
 
----
+------------------------------------------------------------------------
 
 # Project Setup
 
@@ -85,120 +107,447 @@ COMPLETED
 
 Make sure you have the following installed:
 
-- Node.js 18+
-- npm
+-   Node.js
+-   npm
+-   PostgreSQL database / Prisma Postgres project
 
 Check your versions:
 
-```bash
+``` bash
 node -v
 npm -v
 ```
 
-## Create the Project
-
-```bash
-npx create-next-app@latest timesheet-app
-```
-
-Recommended options:
-
-```text
-TypeScript          Yes
-ESLint              Yes
-Tailwind CSS        Yes
-src/ directory      No
-App Router          Yes
-Turbopack           Yes
-Import alias        Yes
-```
-
-Move into the project:
-
-```bash
-cd timesheet-app
-```
-
 ## Install Dependencies
 
-```bash
+Clone the project and install dependencies:
+
+``` bash
 npm install
 ```
 
-Install authentication and JSON persistence:
+The project already includes Prisma, PostgreSQL adapter dependencies,
+NextAuth, shadcn/ui, and Sonner.
 
-```bash
-npm install next-auth lowdb
+------------------------------------------------------------------------
+
+# Prisma and PostgreSQL Setup
+
+The application uses **Prisma 7 with Prisma Postgres** instead of the
+previous JSON/lowdb persistence layer.
+
+The current persistence architecture is:
+
+``` text
+React UI
+   |
+   v
+Next.js API Routes
+   |
+   v
+Repository Layer
+   |
+   v
+Prisma
+   |
+   v
+PostgreSQL / Prisma Postgres
 ```
 
-Initialize shadcn/ui:
+The JSON files are retained only as **seed data** for initial database
+population. They are no longer used as the application's runtime
+database.
 
-```bash
-npx shadcn@latest init
+## Prisma Schema
+
+The database schema is located at:
+
+``` text
+prisma/schema.prisma
 ```
 
-Install required UI components:
+Current models:
 
-```bash
-npx shadcn@latest add button input label dialog select popover calendar table dropdown-menu badge textarea
+``` text
+User
+Timesheet
+TimesheetEntry
 ```
 
----
+The `TimesheetStatus` enum contains:
+
+``` text
+COMPLETED
+INCOMPLETE
+MISSING
+```
+
+## Prisma Configuration
+
+The Prisma configuration is located at:
+
+``` text
+prisma7.config.ts
+```
+
+The configuration uses the direct database connection for Prisma CLI
+operations and migrations.
+
+Conceptually:
+
+``` text
+DIRECT_URL
+    |
+    v
+Prisma CLI
+    |
+    +-- migrate
+    +-- seed
+    +-- other database administration commands
+```
+
+## Prisma Client
+
+The application uses the PostgreSQL adapter:
+
+``` text
+@prisma/adapter-pg
+       |
+       v
+      pg
+       |
+       v
+PostgreSQL
+```
+
+The Prisma client is created in:
+
+``` text
+lib/db.ts
+```
+
+The application uses:
+
+``` text
+DATABASE_URL
+```
+
+for runtime database access.
+
+## Generated Prisma Client
+
+Prisma generates the client into:
+
+``` text
+generated/prisma
+```
+
+This directory is generated automatically and should **not** be
+committed to Git.
+
+It is regenerated during the application build using:
+
+``` bash
+npx prisma generate
+```
+
+The repository therefore commits the Prisma source files and migrations,
+but not the generated client.
+
+------------------------------------------------------------------------
 
 # Environment Variables
 
-Create a `.env.local` file in the project root:
+Create a local environment file in the project root.
 
-```env
-AUTH_SECRET=your-development-secret
+The application requires:
+
+``` env
+DATABASE_URL="your-pooled-postgresql-connection-string"
+DIRECT_URL="your-direct-postgresql-connection-string"
+
+AUTH_SECRET="your-development-secret"
+NEXTAUTH_URL="http://localhost:3000"
 ```
 
-For production, use a strong randomly generated secret and configure it through the deployment platform's environment variables.
+## `DATABASE_URL`
 
-Do not commit `.env.local` to the repository.
+`DATABASE_URL` is used by the application at runtime through the
+PostgreSQL Prisma adapter.
 
----
+For Prisma Postgres, use the pooled connection string for application
+traffic.
+
+Conceptually:
+
+``` text
+DATABASE_URL
+    |
+    v
+Next.js application
+    |
+    v
+Prisma Client
+    |
+    v
+Pooled PostgreSQL connection
+```
+
+## `DIRECT_URL`
+
+`DIRECT_URL` is used by Prisma CLI operations such as migrations.
+
+Conceptually:
+
+``` text
+DIRECT_URL
+    |
+    v
+Prisma CLI
+    |
+    v
+Direct PostgreSQL connection
+```
+
+Generate the connection strings from the Prisma/Vercel database
+connection settings rather than manually converting one connection
+string into another.
+
+## `AUTH_SECRET`
+
+Used by NextAuth for authentication/session security.
+
+Use a strong, unique secret in production.
+
+## `NEXTAUTH_URL`
+
+For local development:
+
+``` env
+NEXTAUTH_URL="http://localhost:3000"
+```
+
+For production, configure the deployed application URL in Vercel, for
+example:
+
+``` env
+NEXTAUTH_URL="https://your-project.vercel.app"
+```
+
+## Environment Variable Security
+
+Never commit environment files containing secrets:
+
+``` text
+.env
+.env.local
+```
+
+These files should be included in `.gitignore`.
+
+------------------------------------------------------------------------
+
+# Database Migration
+
+After configuring `DIRECT_URL`, generate and apply the database schema
+locally with Prisma migrations.
+
+Create a migration:
+
+``` bash
+npx prisma migrate dev --name init
+```
+
+Check migration status:
+
+``` bash
+npx prisma migrate status
+```
+
+For production deployments, pending committed migrations can be applied
+with:
+
+``` bash
+npx prisma migrate deploy
+```
+
+Do not use `prisma migrate dev` against the production database.
+
+------------------------------------------------------------------------
+
+# Seed Database
+
+The initial seed data is stored in the existing JSON files:
+
+``` text
+data/
+├── users.json
+├── timesheets.json
+└── entries.json
+```
+
+These files are now used only as the source for the Prisma seed script.
+
+The seed script is:
+
+``` text
+prisma/seed.ts
+```
+
+It reads the JSON data and inserts it into PostgreSQL using Prisma
+`upsert()` operations.
+
+Run the seed with:
+
+``` bash
+npx prisma db seed
+```
+
+The seed flow is:
+
+``` text
+users.json
+timesheets.json
+entries.json
+        |
+        v
+prisma/seed.ts
+        |
+        v
+Prisma
+        |
+        v
+PostgreSQL
+```
+
+The seed is not part of the normal Next.js build and should not be run
+automatically on every deployment unless explicitly required.
+
+------------------------------------------------------------------------
+
+# Generate Prisma Client
+
+Whenever the Prisma schema changes, regenerate Prisma Client:
+
+``` bash
+npx prisma generate
+```
+
+The generated output is:
+
+``` text
+generated/prisma/
+```
+
+The generated directory is ignored by Git and is recreated during
+deployment/build.
+
+------------------------------------------------------------------------
 
 # Run the Application
 
 Start the development server:
 
-```bash
+``` bash
 npm run dev
 ```
 
-Open the application:
+Open:
 
-```text
+``` text
 http://localhost:3000
 ```
 
----
+------------------------------------------------------------------------
 
-# Demo Credentials
+# Available Scripts
 
-The application currently uses dummy credentials stored in:
+### Development
 
-```text
-data/users.json
+``` bash
+npm run dev
 ```
 
-Example:
+Starts the Next.js development server.
 
-```text
-Email: john@example.com
-Password: password123
+### Production Build
+
+``` bash
+npm run build
 ```
 
-These credentials are intended only for the take-home assignment.
+Creates the production build. The build configuration also generates the
+Prisma Client before building the Next.js application.
 
-In a production application, passwords should never be stored as plaintext. Password hashing would be implemented using a secure hashing algorithm such as Argon2 or bcrypt.
+### Production Server
 
----
+``` bash
+npm start
+```
+
+Starts the production Next.js server.
+
+### Lint
+
+``` bash
+npm run lint
+```
+
+Runs ESLint.
+
+### Type Check
+
+``` bash
+npm run typecheck
+```
+
+Runs TypeScript type checking without emitting files.
+
+### Prisma Generate
+
+``` bash
+npx prisma generate
+```
+
+Generates the Prisma Client.
+
+### Prisma Migration Status
+
+``` bash
+npx prisma migrate status
+```
+
+Checks the current migration state.
+
+### Prisma Production Migrations
+
+``` bash
+npx prisma migrate deploy
+```
+
+Applies pending committed migrations to the target database.
+
+### Prisma Seed
+
+``` bash
+npx prisma db seed
+```
+
+Seeds the database from the JSON seed data.
+
+### Prisma Studio
+
+``` bash
+npx prisma studio
+```
+
+Opens Prisma Studio for viewing and managing database records.
+
+------------------------------------------------------------------------
 
 # Project Structure
 
-```text
+``` text
 timesheet-app/
 │
 ├── app/
@@ -227,16 +576,24 @@ timesheet-app/
 │   └── page.tsx
 │
 ├── components/
-│   ├── login-form.tsx
-│   ├── timesheet-table.tsx
-│   ├── timesheet-list.tsx
-│   ├── entry-modal.tsx
+│   ├── EntryFormModal.tsx
+│   ├── LoginForm.tsx
+│   ├── Providers.tsx
+│   ├── TimesheetDetails.tsx
+│   ├── TimesheetTable.tsx
+│   ├── header.tsx
 │   └── ui/
+│       ├── sonner.tsx
+│       └── ...
 │
 ├── data/
 │   ├── users.json
 │   ├── timesheets.json
 │   └── entries.json
+│
+├── generated/
+│   └── prisma/
+│       └── ... generated files
 │
 ├── lib/
 │   ├── auth.ts
@@ -245,21 +602,33 @@ timesheet-app/
 │   ├── timesheets.ts
 │   └── entries.ts
 │
-├── types/
-│   └── timesheet.ts
+├── prisma/
+│   ├── migrations/
+│   │   └── ...
+│   ├── schema.prisma
+│   └── seed.ts
 │
+├── public/
+│
+├── .env
 ├── .env.local
+├── .gitignore
 ├── package.json
+├── prisma7.config.ts
 └── README.md
 ```
 
----
+> `generated/prisma` is generated output and should not be committed to
+> Git.
+
+------------------------------------------------------------------------
 
 # Architecture
 
-The application follows a layered architecture to keep the UI, API, business logic, and data persistence separated.
+The application follows a layered architecture to keep the UI, API,
+business logic, and persistence separated.
 
-```text
+``` text
 ┌─────────────────────────┐
 │       React UI          │
 │ Pages + Components      │
@@ -268,195 +637,120 @@ The application follows a layered architecture to keep the UI, API, business log
              │ fetch()
              ▼
 ┌─────────────────────────┐
-│    Next.js API Routes   │
+│   Next.js API Routes    │
 └────────────┬────────────┘
              │
              ▼
 ┌─────────────────────────┐
-│     Repository Layer    │
+│    Repository Layer     │
 │ users / timesheets /    │
 │ entries                 │
 └────────────┬────────────┘
              │
              ▼
 ┌─────────────────────────┐
-│          lowdb          │
+│         Prisma          │
 └────────────┬────────────┘
              │
              ▼
 ┌─────────────────────────┐
-│       JSON Files        │
-│ users.json              │
-│ timesheets.json         │
-│ entries.json            │
+│       PostgreSQL        │
+│     Prisma Postgres     │
 └─────────────────────────┘
 ```
 
-The client never directly accesses the JSON files.
+The client does not directly access PostgreSQL.
 
 All client-side data operations go through internal Next.js API routes.
 
----
+------------------------------------------------------------------------
 
 # Data Storage
 
-For this take-home assignment, a traditional database is intentionally not used.
+The application uses PostgreSQL as its runtime persistent database.
 
-The application uses three separate JSON files:
+Prisma provides the data access layer:
 
-```text
-data/
-├── users.json
-├── timesheets.json
-└── entries.json
-```
-
-Keeping these files separate makes the data easier to understand and allows each data source to be replaced independently in the future.
-
----
-
-## users.json
-
-Stores users used for authentication.
-
-Example:
-
-```json
-[
-  {
-    "id": "user-1",
-    "name": "John Doe",
-    "email": "john@example.com",
-    "password": "password123"
-  }
-]
-```
-
----
-
-## timesheets.json
-
-Stores weekly timesheet information.
-
-Example:
-
-```json
-[
-  {
-    "id": "week-1",
-    "weekNumber": 1,
-    "startDate": "2024-01-01",
-    "endDate": "2024-01-05",
-    "status": "COMPLETED"
-  },
-  {
-    "id": "week-2",
-    "weekNumber": 2,
-    "startDate": "2024-01-08",
-    "endDate": "2024-01-12",
-    "status": "INCOMPLETE"
-  },
-  {
-    "id": "week-3",
-    "weekNumber": 3,
-    "startDate": "2024-01-15",
-    "endDate": "2024-01-19",
-    "status": "MISSING"
-  }
-]
-```
-
-This data powers the dashboard/table view.
-
----
-
-## entries.json
-
-Stores individual work entries.
-
-Example:
-
-```json
-[
-  {
-    "id": "entry-1",
-    "timesheetId": "week-1",
-    "date": "2024-01-01",
-    "project": "Project Alpha",
-    "workType": "Development",
-    "description": "Homepage development",
-    "hours": 4
-  }
-]
-```
-
-Each entry belongs to a weekly timesheet through `timesheetId`.
-
-```text
-timesheets.json
-
-week-1
-  |
-  ├── entry-1
-  ├── entry-2
-  └── entry-3
-```
-
----
-
-# Why lowdb?
-
-`lowdb` is used as a lightweight JSON database for this assignment.
-
-Instead of manually reading and writing JSON files throughout the application, the repository layer uses lowdb to manage the data.
-
-The persistence implementation is isolated from the UI and API layers.
-
-```text
-React Component
-      |
-      v
-API Route
-      |
-      v
+``` text
+Next.js
+   |
+   v
 Repository
-      |
-      v
-lowdb
-      |
-      v
-JSON File
-```
-
-This makes it easier to replace the persistence layer later.
-
-Current implementation:
-
-```text
-API
- ↓
-Repository
- ↓
-lowdb
- ↓
-JSON
-```
-
-Possible production implementation:
-
-```text
-API
- ↓
-Repository
- ↓
+   |
+   v
 Prisma
- ↓
+   |
+   v
 PostgreSQL
 ```
 
-The UI and API contracts can remain largely unchanged.
+The JSON files under `data/` are retained as seed sources only.
 
----
+## `users.json`
+
+Stores initial users used by the seed process.
+
+The seed script reads the users and creates/updates corresponding Prisma
+`User` records.
+
+## `timesheets.json`
+
+Stores initial weekly timesheet data used by the seed process.
+
+The data is inserted into the Prisma `Timesheet` model.
+
+## `entries.json`
+
+Stores initial work-entry data used by the seed process.
+
+Each entry references its parent timesheet through `timesheetId`.
+
+------------------------------------------------------------------------
+
+# Database Models
+
+## User
+
+``` text
+User
+├── id
+├── name
+├── email
+└── password
+```
+
+`email` is unique.
+
+## Timesheet
+
+``` text
+Timesheet
+├── id
+├── weekNumber
+├── startDate
+├── endDate
+├── status
+└── entries[]
+```
+
+## TimesheetEntry
+
+``` text
+TimesheetEntry
+├── id
+├── timesheetId
+├── date
+├── project
+├── workType
+├── description
+└── hours
+```
+
+Each `TimesheetEntry` belongs to a `Timesheet`.
+
+Deleting a timesheet cascades to its related entries.
+
+------------------------------------------------------------------------
 
 # Authentication Implementation
 
@@ -464,7 +758,7 @@ Authentication is implemented using NextAuth's Credentials Provider.
 
 The authentication flow is:
 
-```text
+``` text
 ┌───────────────┐
 │   Login Page  │
 └───────┬───────┘
@@ -482,23 +776,24 @@ The authentication flow is:
          │
          ▼
 ┌──────────────────┐
-│   users.json     │
+│      Prisma      │
+│      User        │
 └────────┬─────────┘
          │
-     ┌───┴────┐
-     │        │
-   Valid    Invalid
-     │        │
-     ▼        ▼
-  Session   Error
-     │
-     ▼
+    ┌────┴────┐
+    │         │
+  Valid    Invalid
+    │         │
+    ▼         ▼
+ Session     Error
+    │
+    ▼
  /dashboard
 ```
 
 The login form uses:
 
-```ts
+``` ts
 signIn("credentials", {
   email,
   password,
@@ -508,17 +803,17 @@ signIn("credentials", {
 
 Authentication configuration is located in:
 
-```text
+``` text
 lib/auth.ts
 ```
 
 The NextAuth API route is located in:
 
-```text
+``` text
 app/api/auth/[...nextauth]/route.ts
 ```
 
----
+------------------------------------------------------------------------
 
 # Session Protection
 
@@ -526,7 +821,7 @@ Protected pages validate the authenticated session on the server.
 
 Example:
 
-```ts
+``` ts
 const session = await getServerSession(authOptions);
 
 if (!session?.user) {
@@ -534,11 +829,89 @@ if (!session?.user) {
 }
 ```
 
-This prevents unauthenticated users from directly accessing protected dashboard pages.
+This prevents unauthenticated users from directly accessing protected
+dashboard pages.
 
-Protected API routes will also validate the session before allowing data operations.
+Protected API routes also validate the session before allowing data
+operations.
 
----
+------------------------------------------------------------------------
+
+# Providers and Global Configuration
+
+The application uses a client-side `Providers` component to wrap global
+client providers.
+
+Current structure:
+
+``` text
+RootLayout
+    |
+    v
+Providers
+    |
+    ├── SessionProvider
+    |
+    ├── Toaster
+    |
+    └── Application
+```
+
+`SessionProvider` provides the NextAuth session context.
+
+The Sonner `Toaster` provides global toast notifications.
+
+The providers component is located at:
+
+``` text
+components/providers.tsx
+```
+
+------------------------------------------------------------------------
+
+# Toast Notifications
+
+Toast notifications are implemented using **shadcn/ui Sonner**.
+
+The toaster is mounted globally through `Providers`.
+
+In a Client Component:
+
+``` tsx
+"use client";
+
+import { toast } from "sonner";
+```
+
+Examples:
+
+``` tsx
+toast.success("Timesheet created successfully!");
+```
+
+``` tsx
+toast.error("Something went wrong.");
+```
+
+``` tsx
+toast.warning("Please complete all required fields.");
+```
+
+With a description:
+
+``` tsx
+toast.success("Timesheet updated", {
+  description: "Your changes have been saved.",
+});
+```
+
+The reusable Sonner component is located at:
+
+``` text
+components/ui/sonner.tsx
+```
+
+------------------------------------------------------------------------
 
 # Application Pages
 
@@ -546,44 +919,53 @@ Protected API routes will also validate the session before allowing data operati
 
 Route:
 
-```text
+``` text
 /login
 ```
 
 The login page contains:
 
-- Email input
-- Password input
-- Remember me checkbox
-- Sign in button
-- Loading state
-- Authentication error state
+-   Email input
+-   Password input
+-   Remember me checkbox
+-   Sign in button
+-   Loading state
+-   Authentication error state
 
 After successful authentication:
 
-```text
+``` text
 /login
-   ↓
+   |
+   v
 Authentication
-   ↓
+   |
+   v
 /dashboard
 ```
 
----
+------------------------------------------------------------------------
 
 ## Dashboard / Table View
 
 Route:
 
-```text
+``` text
 /dashboard
 ```
 
-The dashboard provides an overview of all weekly timesheets.
+The dashboard provides an overview of weekly timesheets.
+
+The dashboard supports:
+
+-   Date range filtering
+-   Status filtering
+-   Pagination
+-   Status-specific actions
 
 Example:
 
-```text
+``` text
 Your Timesheets
 
 Date Range        Status
@@ -595,83 +977,53 @@ Week #   Date              Status       Action
 3        Jan 15 - Jan 19   MISSING      Create
 ```
 
-The dashboard supports:
-
-- Date range filtering
-- Status filtering
-- Pagination
-- Status-specific actions
-
----
+------------------------------------------------------------------------
 
 ## Weekly Timesheet / List View
 
 Route:
 
-```text
+``` text
 /dashboard/[timesheetId]
 ```
 
-This page displays the entries belonging to a specific week.
+This page displays entries belonging to a specific week.
 
 Entries are grouped by date.
 
-Example:
+The page displays:
 
-```text
-This week's timesheet
+-   Weekly date range
+-   Total hours
+-   40-hour progress
+-   Daily entries
+-   Add task action
+-   Edit task action
+-   Delete task action
 
-Jan 15 - Jan 19
-
-20 / 40 hrs
-
-Jan 15
-
-Development                       4h
-Homepage implementation
-
-Bug fixes                         4h
-Fixed authentication issue
-
-+ Add new task
-
-
-Jan 16
-
-Development                       8h
-API implementation
-
-+ Add new task
-```
-
----
+------------------------------------------------------------------------
 
 # Timesheet Status
-
-The application supports three statuses.
 
 ## MISSING
 
 A week has no timesheet entries.
 
-Example:
-
-```text
+``` text
 MISSING
-Create
+   |
+   └── Create
 ```
-
-Clicking `Create` opens the weekly timesheet.
 
 When the first task is successfully created:
 
-```text
+``` text
 MISSING → INCOMPLETE
 ```
 
 The status transition is handled by the server.
 
----
+------------------------------------------------------------------------
 
 ## INCOMPLETE
 
@@ -679,17 +1031,17 @@ A week has one or more entries but is not completed.
 
 The user can:
 
-- Add entries
-- Edit entries
-- Delete entries
+-   Add entries
+-   Edit entries
+-   Delete entries
 
-The dashboard action is:
+Dashboard action:
 
-```text
+``` text
 INCOMPLETE → Update
 ```
 
----
+------------------------------------------------------------------------
 
 ## COMPLETED
 
@@ -697,25 +1049,26 @@ A completed timesheet is read-only.
 
 The user can view the timesheet but cannot:
 
-- Add entries
-- Edit entries
-- Delete entries
+-   Add entries
+-   Edit entries
+-   Delete entries
 
-The dashboard action is:
+Dashboard action:
 
-```text
+``` text
 COMPLETED → View
 ```
 
----
+------------------------------------------------------------------------
 
 # Entry Management
 
-The application uses one reusable entry modal for both creating and editing entries.
+The application uses a reusable entry modal for creating and editing
+entries.
 
 ## Add Entry
 
-```text
+``` text
 Add New Entry
 
 Select Project *
@@ -730,7 +1083,7 @@ Hours *
 
 The same component is populated with the selected entry:
 
-```text
+``` text
 Edit Entry
 
 Select Project *
@@ -741,15 +1094,10 @@ Hours *
 [ Update entry ] [ Cancel ]
 ```
 
-The date is determined by the day from which the user clicks:
+The date is determined by the day from which the user clicks the
+add-entry action, so the modal does not require a separate date field.
 
-```text
-+ Add new task
-```
-
-Therefore, the entry modal does not need a separate date field.
-
----
+------------------------------------------------------------------------
 
 # API Design
 
@@ -757,110 +1105,103 @@ All client-side timesheet operations use internal Next.js API routes.
 
 ## Get Timesheets
 
-```http
+``` http
 GET /api/timesheets
 ```
 
-Returns the available weekly timesheets.
-
----
+Returns available weekly timesheets.
 
 ## Get Weekly Entries
 
-```http
+``` http
 GET /api/timesheets/:timesheetId/entries
 ```
 
 Returns entries belonging to the selected timesheet.
 
----
-
 ## Create Entry
 
-```http
+``` http
 POST /api/timesheets/:timesheetId/entries
 ```
 
 Creates a new work entry.
 
-If the selected timesheet is currently `MISSING`, the API changes the status to:
+If the selected timesheet is currently `MISSING`, the API changes the
+status to:
 
-```text
+``` text
 MISSING → INCOMPLETE
 ```
 
 after the entry is successfully created.
 
----
-
 ## Update Entry
 
-```http
+``` http
 PUT /api/timesheets/:timesheetId/entries/:entryId
 ```
 
 Updates an existing work entry.
 
----
-
 ## Delete Entry
 
-```http
+``` http
 DELETE /api/timesheets/:timesheetId/entries/:entryId
 ```
 
 Deletes an existing work entry.
 
----
+------------------------------------------------------------------------
 
 # API Request Flow
 
 Example: adding a new task.
 
-```text
+``` text
 User clicks "+ Add new task"
           |
-          ▼
+          v
      Entry Modal
           |
           | POST
-          ▼
-/api/timesheets/week-3/entries
+          v
+/api/timesheets/:timesheetId/entries
           |
-          ▼
-   Validate Session
+          v
+    Validate Session
           |
-          ▼
+          v
    Validate Request
           |
-          ▼
-    Entry Repository
+          v
+   Entry Repository
           |
-          ▼
-      entries.json
+          v
+        Prisma
           |
-          ▼
-Is timesheet MISSING?
+          v
+      PostgreSQL
+          |
+          v
+ Is timesheet MISSING?
           |
          Yes
           |
-          ▼
-    Update Timesheet
+          v
+   Update Timesheet
           |
-          ▼
- timesheets.json
-          |
-          ▼
+          v
 MISSING → INCOMPLETE
           |
-          ▼
-    API Response
+          v
+     API Response
           |
-          ▼
-       Update UI
+          v
+      Update UI
 ```
 
----
+------------------------------------------------------------------------
 
 # Validation
 
@@ -868,50 +1209,54 @@ Both client-side and server-side validation are used.
 
 Required fields:
 
-- Project
-- Type of Work
-- Task Description
-- Hours
+-   Project
+-   Type of Work
+-   Task Description
+-   Hours
 
 Hours must be a valid positive number.
 
-Server-side validation is important because client-side validation alone cannot be trusted.
+Server-side validation is important because client-side validation alone
+cannot be trusted.
 
----
+------------------------------------------------------------------------
 
 # UI Components
 
 The application uses reusable shadcn/ui components where appropriate.
 
-Examples:
+Examples include:
 
-- Button
-- Input
-- Label
-- Dialog
-- Select
-- Popover
-- Calendar
-- Table
-- Dropdown Menu
-- Badge
-- Textarea
+-   Button
+-   Input
+-   Label
+-   Dialog
+-   Select
+-   Popover
+-   Calendar
+-   Table
+-   Dropdown Menu
+-   Badge
+-   Textarea
+-   Sonner
 
-Application-specific components are kept separate from the reusable shadcn/ui components.
+Application-specific components are kept separate from reusable
+shadcn/ui components.
 
----
+------------------------------------------------------------------------
 
 # Responsive Design
 
 The application is designed to work across:
 
-- Desktop
-- Tablet
-- Mobile
+-   Desktop
+-   Tablet
+-   Mobile
 
-The dashboard table and weekly timesheet views adapt to smaller screen sizes.
+The dashboard table and weekly timesheet views adapt to smaller screen
+sizes.
 
----
+------------------------------------------------------------------------
 
 # Loading and Error States
 
@@ -919,11 +1264,11 @@ API operations provide loading and error feedback.
 
 Examples:
 
-```text
+``` text
 Loading timesheets...
 ```
 
-```text
+``` text
 Unable to load timesheets.
 
 [ Try again ]
@@ -931,13 +1276,134 @@ Unable to load timesheets.
 
 During an entry operation:
 
-```text
+``` text
 Saving entry...
 ```
 
+Toast notifications are also used to communicate successful operations
+and errors.
+
 The UI should not silently fail when an API request encounters an error.
 
----
+------------------------------------------------------------------------
+
+# Deployment on Vercel
+
+The application is designed to deploy to Vercel with Prisma Postgres.
+
+The deployment architecture is:
+
+``` text
+GitHub
+   |
+   v
+Vercel
+   |
+   ├── Prisma generate
+   |
+   ├── Prisma migrations
+   |
+   v
+Next.js Application
+   |
+   v
+Prisma Client
+   |
+   v
+Prisma Postgres
+```
+
+## Vercel Environment Variables
+
+Configure the following variables in the Vercel project:
+
+``` text
+DATABASE_URL
+DIRECT_URL
+AUTH_SECRET
+NEXTAUTH_URL
+```
+
+### Production values
+
+``` text
+DATABASE_URL
+→ Pooled Prisma Postgres connection
+
+DIRECT_URL
+→ Direct Prisma Postgres connection
+
+AUTH_SECRET
+→ Strong production secret
+
+NEXTAUTH_URL
+→ Production Vercel/application URL
+```
+
+Do not use:
+
+``` text
+http://localhost:3000
+```
+
+for the production `NEXTAUTH_URL`.
+
+The Vercel/Prisma integration may also provide additional managed
+variables such as:
+
+``` text
+POSTGRES_URL
+PRISMA_DATABASE_URL
+```
+
+The application itself uses `DATABASE_URL` for runtime queries and
+`DIRECT_URL` for Prisma CLI/migration operations.
+
+## Deployment Build
+
+The production build is run through:
+
+``` bash
+npm run build
+```
+
+The build generates the Prisma Client before building Next.js.
+
+If the build is configured to run production migrations, it uses:
+
+``` bash
+npx prisma migrate deploy
+```
+
+against the configured `DIRECT_URL`.
+
+## Important Deployment Files
+
+Commit:
+
+``` text
+prisma/schema.prisma
+prisma/migrations/
+prisma/seed.ts
+prisma7.config.ts
+package.json
+package-lock.json
+lib/db.ts
+```
+
+Do not commit:
+
+``` text
+.env
+.env.local
+generated/
+.next/
+node_modules/
+```
+
+The generated Prisma client is recreated during the build.
+
+------------------------------------------------------------------------
 
 # Development Principles
 
@@ -945,171 +1411,140 @@ The project intentionally avoids unnecessary complexity.
 
 ## Separation of Concerns
 
-UI, API, business logic, and persistence are separated.
+UI, API, business logic, and persistence are separated:
 
-```text
+``` text
 UI
  ↓
 API
  ↓
 Repository
  ↓
-Data
+Prisma
+ ↓
+PostgreSQL
 ```
 
 ## Reusable Components
 
-Common functionality is extracted into reusable components rather than duplicated across pages.
+Common functionality is extracted into reusable components rather than
+duplicated across pages.
 
 ## Type Safety
 
-TypeScript types are used for:
+TypeScript is used throughout the application for:
 
-- Users
-- Timesheets
-- Timesheet entries
-- Timesheet statuses
-- API request/response data
+-   Users
+-   Timesheets
+-   Timesheet entries
+-   Timesheet statuses
+-   API request/response data
+
+Prisma also provides generated types based on the database schema.
 
 ## Server-Side Authentication
 
 Protected pages and APIs validate authentication on the server.
 
-## Simple Persistence
+## Persistent Database
 
-JSON + lowdb is used because this is a small take-home assignment and does not require introducing a full database.
+The application uses Prisma/PostgreSQL for persistent runtime data
+rather than a local JSON database.
 
----
+------------------------------------------------------------------------
 
 # Production Improvements
 
-The current JSON/lowdb implementation is intended for this assignment and local/demo use.
+Although the application now uses PostgreSQL for persistence, additional
+production improvements could include:
 
-A production implementation would replace the JSON persistence layer with a proper persistent database.
+-   Password hashing using Argon2 or bcrypt
+-   Proper user authorization
+-   Multi-tenant access control
+-   Input validation using Zod
+-   Database transactions where required
+-   Audit logging
+-   Rate limiting
+-   Automated tests
+-   Error monitoring
+-   Production-grade logging
+-   Improved observability
+-   More granular role-based permissions
 
-For example:
-
-```text
-Next.js
-   |
-   ▼
-API Routes
-   |
-   ▼
-Repository / Service Layer
-   |
-   ▼
-Prisma
-   |
-   ▼
-PostgreSQL
-```
-
-Other production improvements would include:
-
-- Password hashing using Argon2 or bcrypt
-- Database-backed user management
-- Proper user authorization
-- Multi-tenant access control
-- Input validation using Zod
-- Database transactions
-- Audit logging
-- Rate limiting
-- Automated tests
-- Error monitoring
-- Production-grade logging
-- Persistent cloud storage
-
----
-
-# Deployment Consideration
-
-The application currently uses JSON files for persistence.
-
-A serverless deployment may use an ephemeral filesystem, which means modifications to JSON files may not persist between instances or deployments.
-
-For a production deployment, the persistence layer should therefore be replaced with a hosted database or deployed to an environment that provides persistent storage.
-
-The repository abstraction makes this migration easier because the UI does not directly depend on the JSON implementation.
-
----
-
-# Available Scripts
-
-Start development server:
-
-```bash
-npm run dev
-```
-
-Create production build:
-
-```bash
-npm run build
-```
-
-Start production server:
-
-```bash
-npm start
-```
-
-Run ESLint:
-
-```bash
-npm run lint
-```
-
----
+------------------------------------------------------------------------
 
 # Implementation Status
 
 ## Authentication
 
-- [x] Login UI
-- [x] Credentials authentication
-- [x] JSON user storage
-- [x] NextAuth session
-- [x] Protected dashboard
+-   [x] Login UI
+-   [x] Credentials authentication
+-   [x] Prisma user storage
+-   [x] NextAuth session
+-   [x] Protected dashboard
+-   [x] Logout
+-   [x] Authentication error handling
+
+## Database
+
+-   [x] Prisma 7
+-   [x] PostgreSQL database
+-   [x] Prisma schema
+-   [x] Prisma migrations
+-   [x] Prisma seed script
+-   [x] Prisma PostgreSQL adapter
+-   [x] JSON data converted to database seed data
+-   [x] Generated Prisma client
+-   [x] Database repository layer
 
 ## Timesheet API
 
-- [ ] Get timesheets
-- [ ] Get weekly entries
-- [ ] Create entry
-- [ ] Update entry
-- [ ] Delete entry
-- [ ] MISSING → INCOMPLETE transition
+-   [x] Get timesheets
+-   [x] Get weekly entries
+-   [x] Create entry
+-   [x] Update entry
+-   [x] Delete entry
+-   [x] MISSING → INCOMPLETE transition
 
 ## Dashboard
 
-- [ ] Table View
-- [ ] Status filter
-- [ ] Date range filter
-- [ ] Pagination
-- [ ] Responsive design
+-   [x] Table view
+-   [x] Status filter
+-   [x] Date range filter
+-   [x] Pagination
+-   [x] Responsive design
+-   [x] Status-specific actions
 
 ## Weekly Timesheet
 
-- [ ] List View
-- [ ] Daily grouping
-- [ ] Weekly hour calculation
-- [ ] Progress indicator
-- [ ] Add entry
-- [ ] Edit entry
-- [ ] Delete entry
-- [ ] Completed read-only state
+-   [x] List view
+-   [x] Daily grouping
+-   [x] Weekly hour calculation
+-   [x] Progress indicator
+-   [x] Add entry
+-   [x] Edit entry
+-   [x] Delete entry
+-   [x] Completed read-only state
 
-## Quality
+## UI / UX
 
-- [ ] Loading states
-- [ ] Error states
-- [ ] Validation
-- [ ] Tests
-- [ ] Production build
-- [ ] Deployment
+-   [x] shadcn/ui components
+-   [x] Sonner toast notifications
+-   [x] Loading states
+-   [x] Error states
+-   [x] Form validation
+-   [x] Responsive layout
 
----
+## Quality / Deployment
+
+-   [x] Type checking
+-   [x] Production build
+-   [x] Prisma Client generation
+-   [x] Vercel deployment configuration
+-   [ ] Automated tests
+-   [ ] Production monitoring
+
+------------------------------------------------------------------------
 
 # License
 
